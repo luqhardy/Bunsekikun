@@ -1,4 +1,5 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/jisho/route": "app/api/jisho/route.js",
   "/assets/icon.png/route": "app/assets/icon.png/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",

@@ -57,7 +57,7 @@ interface JishoSense {
     restrictions: string[];
     see_also: string[];
     antonyms: string[];
-    source: unknown[];
+    //source: unknown[];
     info: string[];
 }
 interface JishoData {
