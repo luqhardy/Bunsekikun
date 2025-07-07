@@ -1,1 +1,14 @@
-node_modules
+# Ignore node_modules directory
+node_modules/
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore environment variables
+.env
+
+# Ignore Next.js build output
+.next/
