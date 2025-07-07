@@ -102,22 +102,22 @@ let kuromojiTokenizer: KuromojiTokenizer | null = null;
 
 const loadKuromoji = (setTokenizerLoading: React.Dispatch<React.SetStateAction<boolean>>, setError?: React.Dispatch<React.SetStateAction<string | null>>): void => {
     setTokenizerLoading(true);
-    let timeoutId: NodeJS.Timeout | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js";
     script.async = true;
     script.onload = () => {
-        if (timeoutId) clearTimeout(timeoutId);
+        if (timeoutId) { clearTimeout(timeoutId); }
         if (!window.kuromoji) {
             setTokenizerLoading(false);
-            setError && setError("Kuromoji script loaded but window.kuromoji is undefined.");
+            if (setError) setError("Kuromoji script loaded but window.kuromoji is undefined.");
             return;
         }
         window.kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build((err, tokenizer) => {
             if (err) {
                 console.error("Kuromoji build error:", err);
                 setTokenizerLoading(false);
-                setError && setError("Failed to build Kuromoji tokenizer.");
+                if (setError) setError("Failed to build Kuromoji tokenizer.");
                 return;
             }
             kuromojiTokenizer = tokenizer;
@@ -126,16 +126,16 @@ const loadKuromoji = (setTokenizerLoading: React.Dispatch<React.SetStateAction<b
         });
     };
     script.onerror = () => {
-        if (timeoutId) clearTimeout(timeoutId);
+        if (timeoutId) { clearTimeout(timeoutId); }
         console.error("Failed to load Kuromoji script.");
         setTokenizerLoading(false);
-        setError && setError("Failed to load Kuromoji script from CDN.");
+        if (setError) setError("Failed to load Kuromoji script from CDN.");
     };
     // Timeout after 10 seconds
     timeoutId = setTimeout(() => {
         console.error("Kuromoji script load timed out.");
         setTokenizerLoading(false);
-        setError && setError("Kuromoji script load timed out. Please check your connection or try again later.");
+        if (setError) setError("Kuromoji script load timed out. Please check your connection or try again later.");
     }, 10000);
     document.body.appendChild(script);
 };
