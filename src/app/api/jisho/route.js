@@ -17,8 +17,7 @@ export async function GET(request) {
     }
 
     const data = await apiResponse.json();
-    // Wrap the response in a 'data' property to match frontend expectations
-    return NextResponse.json({ data: data.data });
+    return NextResponse.json(data);
 
   } catch (error) {
     console.error('Jisho proxy error:', error);
