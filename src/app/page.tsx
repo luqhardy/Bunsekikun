@@ -315,7 +315,7 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, onWordSelec
 };
 
 export default function App() {
-    const [inputText, setInputText] = useState("僕らは命に嫌われている。");
+    const [inputText, setInputText] = useState("吾輩は猫である。名前はまだ無い");
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [selectedWord, setSelectedWord] = useState<AnalyzedWord | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -360,7 +360,7 @@ export default function App() {
         setSelectedWord(null);
     }
 
-    const exampleTexts = useMemo(() => ["僕らは命に嫌われている。", "価値観もエゴも押し付けて", "軽々しく死にたいだとか"], []);
+    const exampleTexts = useMemo(() => ["吾輩は猫である。名前はまだ無い", "どこで生れたかとんと見当がつかぬ", "何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。"], []);
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 md:p-8">
