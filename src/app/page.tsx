@@ -101,7 +101,7 @@ function loadKuromoji({ setTokenizerLoading, setError, kuromojiTokenizerRef }: {
             if (setError) setError("Kuromoji script loaded but window.kuromoji is undefined.");
             return;
         }
-        win.kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build((err: Error | null, tokenizer: KuromojiTokenizer) => {
+        win.kuromoji.builder({ dicPath: "/kuromoji_dict/" }).build((err: Error | null, tokenizer: KuromojiTokenizer) => {
             if (err) {
                 console.error("Kuromoji build error:", err);
                 setTokenizerLoading(false);
