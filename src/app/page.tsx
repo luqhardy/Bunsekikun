@@ -87,11 +87,7 @@ const posColors: { [key: string]: string } = {
 
 // --- Kuromoji & Jisho API Functions ---
 
-const loadKuromoji = (
-    setTokenizerLoading: React.Dispatch<React.SetStateAction<boolean>>,
-    setError: React.Dispatch<React.SetStateAction<string | null>> | undefined,
-    kuromojiTokenizerRef: React.MutableRefObject<KuromojiTokenizer | null>
-): void => {
+function loadKuromoji({ setTokenizerLoading, setError, kuromojiTokenizerRef }: { setTokenizerLoading: React.Dispatch<React.SetStateAction<boolean>>; setError: React.Dispatch<React.SetStateAction<string | null>> | undefined; kuromojiTokenizerRef: React.MutableRefObject<KuromojiTokenizer | null>; }): void {
     setTokenizerLoading(true);
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const script = document.createElement('script');
@@ -99,7 +95,7 @@ const loadKuromoji = (
     script.async = true;
     script.onload = () => {
         if (timeoutId) { clearTimeout(timeoutId); }
-        const win = window as { kuromoji?: { builder: (options: { dicPath: string }) => { build: (callback: (err: Error | null, tokenizer: KuromojiTokenizer) => void) => void } } };
+        const win = window as { kuromoji?: { builder: (options: { dicPath: string; }) => { build: (callback: (err: Error | null, tokenizer: KuromojiTokenizer) => void) => void; }; }; };
         if (!win.kuromoji) {
             setTokenizerLoading(false);
             if (setError) setError("Kuromoji script loaded but window.kuromoji is undefined.");
@@ -130,7 +126,7 @@ const loadKuromoji = (
         if (setError) setError("Kuromoji script load timed out. Please check your connection or try again later.");
     }, 10000);
     document.body.appendChild(script);
-};
+}
 
 const groupTokens = (tokens: KuromojiToken[]): AnalyzedWord[] => {
     if (!tokens || tokens.length === 0) return [];
@@ -317,7 +313,7 @@ export default function App() {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            loadKuromoji(setTokenizerLoading, setError, kuromojiTokenizer);
+            loadKuromoji({ setTokenizerLoading, setError, kuromojiTokenizerRef: kuromojiTokenizer });
         }
     }, []);
 
