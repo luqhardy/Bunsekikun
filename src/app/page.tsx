@@ -307,30 +307,40 @@ export default function App() {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [selectedWord, setSelectedWord] = useState<AnalyzedWord | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [tokenizerLoading, setTokenizerLoading] = useState(true);
+    const [tokenizerLoading, setTokenizerLoading] = useState(false); // default: not loading
     const [error, setError] = useState<string | null>(null);
     const kuromojiTokenizer = React.useRef<KuromojiTokenizer | null>(null);
-
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            loadKuromoji({ setTokenizerLoading, setError, kuromojiTokenizerRef: kuromojiTokenizer });
-        }
-    }, []);
 
     const handleAnalyse = () => {
         if (!inputText.trim()) {
             setError("Please enter some text to analyze.");
             return;
         }
-        if (tokenizerLoading || !kuromojiTokenizer.current) {
-            setError("Tokenizer is not ready yet. Please wait.");
+        if (!kuromojiTokenizer.current) {
+            setTokenizerLoading(true);
+            setError(null);
+            setAnalysis(null);
+            setSelectedWord(null);
+            // Lazy-load Kuromoji
+            loadKuromoji({
+                setTokenizerLoading,
+                setError,
+                kuromojiTokenizerRef: kuromojiTokenizer
+            });
+            // Wait for tokenizer to load, then retry
+            const checkLoaded = setInterval(() => {
+                if (kuromojiTokenizer.current) {
+                    clearInterval(checkLoaded);
+                    setTokenizerLoading(false);
+                    handleAnalyse(); // Retry analysis
+                }
+            }, 100);
             return;
         }
         setIsLoading(true);
         setError(null);
         setAnalysis(null);
         setSelectedWord(null);
-        
         try {
             const tokens = kuromojiTokenizer.current.tokenize(inputText);
             const groupedTokens = groupTokens(tokens);
