@@ -99,7 +99,7 @@ const loadKuromoji = (
     script.async = true;
     script.onload = () => {
         if (timeoutId) { clearTimeout(timeoutId); }
-        const win = window as any;
+        const win = window as { kuromoji?: { builder: (options: { dicPath: string }) => { build: (callback: (err: Error | null, tokenizer: KuromojiTokenizer) => void) => void } } };
         if (!win.kuromoji) {
             setTokenizerLoading(false);
             if (setError) setError("Kuromoji script loaded but window.kuromoji is undefined.");
