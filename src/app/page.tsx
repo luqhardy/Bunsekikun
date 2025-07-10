@@ -98,9 +98,11 @@ const posColors: { [key: string]: string } = {
 
 // --- Kuromoji & Jisho API Functions ---
 
-let kuromojiTokenizer: KuromojiTokenizer | null = null;
-
-const loadKuromoji = (setTokenizerLoading: React.Dispatch<React.SetStateAction<boolean>>, setError?: React.Dispatch<React.SetStateAction<string | null>>): void => {
+const loadKuromoji = (
+    setTokenizerLoading: React.Dispatch<React.SetStateAction<boolean>>,
+    setError: React.Dispatch<React.SetStateAction<string | null>> | undefined,
+    kuromojiTokenizerRef: React.MutableRefObject<KuromojiTokenizer | null>
+): void => {
     setTokenizerLoading(true);
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const script = document.createElement('script');
@@ -120,7 +122,7 @@ const loadKuromoji = (setTokenizerLoading: React.Dispatch<React.SetStateAction<b
                 if (setError) setError("Failed to build Kuromoji tokenizer.");
                 return;
             }
-            kuromojiTokenizer = tokenizer;
+            kuromojiTokenizerRef.current = tokenizer;
             console.log("Kuromoji tokenizer loaded.");
             setTokenizerLoading(false);
         });
@@ -321,10 +323,11 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [tokenizerLoading, setTokenizerLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const kuromojiTokenizer = React.useRef<KuromojiTokenizer | null>(null);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            loadKuromoji(setTokenizerLoading, setError);
+            loadKuromoji(setTokenizerLoading, setError, kuromojiTokenizer);
         }
     }, []);
 
@@ -333,7 +336,7 @@ export default function App() {
             setError("Please enter some text to analyze.");
             return;
         }
-        if (tokenizerLoading || !kuromojiTokenizer) {
+        if (tokenizerLoading || !kuromojiTokenizer.current) {
             setError("Tokenizer is not ready yet. Please wait.");
             return;
         }
@@ -343,7 +346,7 @@ export default function App() {
         setSelectedWord(null);
         
         try {
-            const tokens = kuromojiTokenizer.tokenize(inputText);
+            const tokens = kuromojiTokenizer.current.tokenize(inputText);
             const groupedTokens = groupTokens(tokens);
             setAnalysis({ word_list: groupedTokens });
         } catch (err) {
