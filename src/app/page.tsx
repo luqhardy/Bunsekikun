@@ -323,7 +323,9 @@ export default function App() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        loadKuromoji(setTokenizerLoading, setError);
+        if (typeof window !== "undefined") {
+            loadKuromoji(setTokenizerLoading, setError);
+        }
     }, []);
 
     const handleAnalyse = () => {
