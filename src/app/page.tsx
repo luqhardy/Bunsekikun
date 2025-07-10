@@ -23,17 +23,6 @@ interface KuromojiTokenizer {
     tokenize: (text: string) => KuromojiToken[];
 }
 
-// To let TypeScript know about the kuromoji object on the window
-declare global {
-    interface Window {
-        kuromoji: {
-            builder: (options: { dicPath: string }) => {
-                build: (callback: (err: Error | null, tokenizer: KuromojiTokenizer) => void) => void;
-            };
-        };
-    }
-}
-
 // The internal representation of a token [surface, reading, pos]
 type AnalyzedToken = [string, string, string];
 // A "word" is a group of one or more tokens
@@ -110,12 +99,13 @@ const loadKuromoji = (
     script.async = true;
     script.onload = () => {
         if (timeoutId) { clearTimeout(timeoutId); }
-        if (!window.kuromoji) {
+        const win = window as any;
+        if (!win.kuromoji) {
             setTokenizerLoading(false);
             if (setError) setError("Kuromoji script loaded but window.kuromoji is undefined.");
             return;
         }
-        window.kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build((err, tokenizer) => {
+        win.kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build((err: Error | null, tokenizer: KuromojiTokenizer) => {
             if (err) {
                 console.error("Kuromoji build error:", err);
                 setTokenizerLoading(false);
