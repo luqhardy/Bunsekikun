@@ -101,7 +101,7 @@ function loadKuromoji({ setTokenizerLoading, setError, kuromojiTokenizerRef }: {
             if (setError) setError("Kuromoji script loaded but window.kuromoji is undefined.");
             return;
         }
-        win.kuromoji.builder({ dicPath: "/kuromoji_dict" }).build((err: Error | null, tokenizer: KuromojiTokenizer) => {
+        win.kuromoji.builder({ dicPath: "/kuromoji_dict/" }).build((err: Error | null, tokenizer: KuromojiTokenizer) => {
             if (err) {
                 console.error("Kuromoji build error:", err);
                 setTokenizerLoading(false);
@@ -368,6 +368,25 @@ export default function App() {
             <style>{`.animate-fade-in { animation: fade-in 0.3s ease-out forwards; } @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
             <div className="max-w-4xl mx-auto">
                 <Header />
+
+                {/* Color Legend */}
+                <section className="mt-4 mb-2">
+                  <h3 className="text-base font-semibold text-gray-700 mb-2">Color Legend (品詞凡例)</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(posColors).filter(([pos]) => [
+                      "名詞","動詞","形容詞","副詞","助詞","助動詞","接続詞","連体詞","感動詞"
+                    ].includes(pos)).map(([pos, colorClass]) => (
+                      <span key={pos} className={`px-2 py-1 rounded text-sm font-medium border ${colorClass}`}>{pos}</span>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {Object.entries(posColors).filter(([pos]) => [
+                      "記号","接頭詞","接尾辞","フィラー","その他","補助記号","未知語"
+                    ].includes(pos)).map(([pos, colorClass]) => (
+                      <span key={pos} className={`px-2 py-1 rounded text-sm font-medium border ${colorClass}`}>{pos}</span>
+                    ))}
+                  </div>
+                </section>
 
                 <main className="mt-8">
                     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
