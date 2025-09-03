@@ -1,5 +1,12 @@
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
+// --- Utility: Katakana/Hiragana Conversion ---
+function toKatakana(str: string) {
+    return str.replace(/[ぁ-ん]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+}
+function toHiragana(str: string) {
+    return str.replace(/[ァ-ン]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+}
 import Image from 'next/image';
 
 // --- TypeScript Type Definitions ---
@@ -269,9 +276,10 @@ interface AnalysisDisplayProps {
     analysis: AnalysisResult | null;
     onWordSelect: (word: AnalyzedWord) => void;
     selectedWord: AnalyzedWord | null;
+    furiganaType: 'hiragana' | 'katakana';
 }
 
-const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, onWordSelect, selectedWord }) => {
+const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, onWordSelect, selectedWord, furiganaType }) => {
     if (!analysis) return null;
 
     const createKey = (word: AnalyzedWord) => word.map(token => token[0]).join('-');
@@ -280,7 +288,12 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, onWordSelec
         <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200 leading-loose text-2xl flex flex-wrap">
             {analysis.word_list.map((word, index) => {
                 const surface = word.map(token => token[0]).join('');
-                const reading = word.map(token => token[1]).join('');
+                let reading = word.map(token => token[1]).join('');
+                if (furiganaType === 'katakana') {
+                  reading = toKatakana(reading);
+                } else {
+                  reading = toHiragana(reading);
+                }
                 const pos = word[0][2];
                 const colorClass = posColors[pos] || posColors["その他"];
                 const isSelected = selectedWord && createKey(word) === createKey(selectedWord);
@@ -309,6 +322,7 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [tokenizerLoading, setTokenizerLoading] = useState(false); // default: not loading
     const [error, setError] = useState<string | null>(null);
+    const [furiganaType, setFuriganaType] = useState<'hiragana' | 'katakana'>('hiragana');
     const kuromojiTokenizer = React.useRef<KuromojiTokenizer | null>(null);
 
     const handleAnalyse = () => {
@@ -363,11 +377,24 @@ export default function App() {
 
     const exampleTexts = useMemo(() => ["吾輩は猫である。名前はまだ無い", "どこで生れたかとんと見当がつかぬ", "何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。"], []);
 
-    return (
-        <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 md:p-8">
-            <style>{`.animate-fade-in { animation: fade-in 0.3s ease-out forwards; } @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-            <div className="max-w-4xl mx-auto">
-                <Header />
+        return (
+                <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 md:p-8">
+                        <style>{`.animate-fade-in { animation: fade-in 0.3s ease-out forwards; } @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+                        <div className="max-w-4xl mx-auto">
+                                <Header />
+
+                                {/* Furigana Toggle */}
+                                <div className="flex items-center gap-4 mb-2">
+                                    <label className="font-medium text-gray-700">Furigana style:</label>
+                                    <button
+                                        className={`px-3 py-1 rounded border ${furiganaType === 'hiragana' ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-white border-gray-300 text-gray-700'}`}
+                                        onClick={() => setFuriganaType('hiragana')}
+                                    >Hiragana</button>
+                                    <button
+                                        className={`px-3 py-1 rounded border ${furiganaType === 'katakana' ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-white border-gray-300 text-gray-700'}`}
+                                        onClick={() => setFuriganaType('katakana')}
+                                    >Katakana</button>
+                                </div>
 
                                 {/* Color Legend */}
                                 <section className="mt-4 mb-2">
@@ -427,7 +454,7 @@ export default function App() {
                         {error && <p className="mt-4 text-red-600 bg-red-100 p-3 rounded-lg">{error}</p>}
                     </div>
                     
-                    {analysis && <div className="animate-fade-in"><AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} /></div>}
+                    {analysis && <div className="animate-fade-in"><AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} furiganaType={furiganaType} /></div>}
                     <WordInfo selectedWord={selectedWord} onClose={handleCloseInfo} />
                 </main>
             </div>
