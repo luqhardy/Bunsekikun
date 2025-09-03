@@ -465,11 +465,19 @@ export default function App() {
                     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                         <h2 className="text-xl font-semibold text-gray-700 mb-4">Enter Japanese Text</h2>
                         <textarea value={inputText} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value)} className="text-black w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="ここに日本語の文章を入力してください..."/>
-                        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <button onClick={handleAnalyse} disabled={isLoading || tokenizerLoading} className="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg">
-                                {tokenizerLoading ? "Loading Analyzer..." : (isLoading ? "Analyzing..." : "Analyse Text!")}
-                            </button>
-                             <div className="text-sm text-gray-500 flex-wrap">Or try an example:
+                        <div className="mt-4 flex flex-col items-center gap-4">
+                            <div className="flex flex-row justify-start gap-6 w-full">
+                                <button onClick={handleAnalyse} disabled={isLoading || tokenizerLoading} className="w-40 h-16 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg">
+                                    {tokenizerLoading ? "Loading Analyzer..." : (isLoading ? "Analyzing..." : "Analyse Text!")}
+                                </button>
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="w-40 h-16 bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all flex items-center justify-center shadow-lg"
+                                >
+                                    Export to CSV
+                                </button>
+                            </div>
+                            <div className="text-sm text-gray-500 flex-wrap">Or try an example:
                                 {exampleTexts.map(text => (<button key={text} onClick={() => setInputText(text)} className="ml-2 text-blue-500 hover:underline">`{text}`</button>))}
                             </div>
                         </div>
@@ -478,14 +486,7 @@ export default function App() {
                     
                     {analysis && (
                         <>
-                            <div className="flex justify-end mb-2">
-                                <button
-                                    onClick={handleExportCSV}
-                                    className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all shadow-lg"
-                                >
-                                    Export to CSV
-                                </button>
-                            </div>
+                            
                             <div className="animate-fade-in">
                                 <AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} furiganaType={furiganaType} />
                             </div>
