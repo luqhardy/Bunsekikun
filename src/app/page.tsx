@@ -377,6 +377,28 @@ export default function App() {
 
     const exampleTexts = useMemo(() => ["吾輩は猫である。名前はまだ無い", "どこで生れたかとんと見当がつかぬ", "何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。"], []);
 
+    // Export to CSV function
+    const handleExportCSV = () => {
+        if (!analysis) return;
+        // CSV header
+        let csv = 'Surface,Reading,Part of Speech\n';
+        analysis.word_list.forEach(word => {
+            const surface = word.map(token => token[0]).join('');
+            const reading = word.map(token => token[1]).join('');
+            const pos = word.map(token => token[2]).join(' ');
+            csv += `"${surface}","${reading}","${pos}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'analysis.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
         return (
                 <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 md:p-8">
                         <style>{`.animate-fade-in { animation: fade-in 0.3s ease-out forwards; } @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
@@ -454,7 +476,21 @@ export default function App() {
                         {error && <p className="mt-4 text-red-600 bg-red-100 p-3 rounded-lg">{error}</p>}
                     </div>
                     
-                    {analysis && <div className="animate-fade-in"><AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} furiganaType={furiganaType} /></div>}
+                    {analysis && (
+                        <>
+                            <div className="flex justify-end mb-2">
+                                <button
+                                    onClick={handleExportCSV}
+                                    className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all shadow-lg"
+                                >
+                                    Export to CSV
+                                </button>
+                            </div>
+                            <div className="animate-fade-in">
+                                <AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} furiganaType={furiganaType} />
+                            </div>
+                        </>
+                    )}
                     <WordInfo selectedWord={selectedWord} onClose={handleCloseInfo} />
                 </main>
             </div>
