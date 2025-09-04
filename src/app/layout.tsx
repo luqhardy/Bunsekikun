@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import React from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,11 +23,35 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Theme state and toggle logic
+  const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.body.classList.toggle('dark', theme === 'dark');
+      window.localStorage.setItem('theme', theme);
+    }
+  }, [theme]);
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <div className="fixed top-4 right-4 z-50">
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="px-4 py-2 rounded-lg border bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '🌙 Dark' : '☀️ Light'} Mode
+          </button>
+        </div>
         {children}
       </body>
     </html>
