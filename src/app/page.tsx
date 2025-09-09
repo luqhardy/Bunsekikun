@@ -1,5 +1,9 @@
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 // --- Utility: Katakana/Hiragana Conversion ---
 function toKatakana(str: string) {
     return str.replace(/[ぁ-ん]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
@@ -244,31 +248,35 @@ const WordInfo: React.FC<WordInfoProps> = ({ selectedWord, onClose }) => {
     }
 
     return (
-        <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200 relative animate-fade-in">
-            <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">{selectedWord.map(token => token[0]).join('')}</h3>
-            <div className="space-y-3 text-left">
-                <p><strong className="font-semibold text-gray-600 w-24">Reading: {selectedWord.map(token => token[1]).join('')}</strong></p>
-                <p><strong className="font-semibold text-gray-600 w-24">Part of Speech: {selectedWord.map(t => t[2]).join(', ')}</strong></p>
-                <div className="pt-2">
-                    <strong className="font-semibold text-gray-600 w-full inline-block">Meaning (from Jisho.org):</strong>
-                    {isLoading && <p>Loading definition...</p>}
-                    {error && <p className="text-red-500">{error}</p>}
-                    {jishoData ? (
-                        <div className="mt-2 space-y-3 pl-2 border-l-4 border-gray-200">
-                            {jishoData.senses.map((sense, index) => (
-                                <div key={index}>
-                                    <p className="font-medium text-gray-700">{index + 1}. {sense.english_definitions.join('; ')}</p>
-                                    <p className="text-sm text-gray-500 ml-4">{sense.parts_of_speech.join(', ')}</p>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (!isLoading && <p>No definition found.</p>)}
+        <Card className="mt-6 relative animate-fade-in">
+            <CardHeader>
+                <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </Button>
+                <h3 className="text-2xl font-bold text-gray-800">{selectedWord.map(token => token[0]).join('')}</h3>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3 text-left">
+                    <p><strong className="font-semibold text-gray-600 w-24">Reading: {selectedWord.map(token => token[1]).join('')}</strong></p>
+                    <p><strong className="font-semibold text-gray-600 w-24">Part of Speech: {selectedWord.map(t => t[2]).join(', ')}</strong></p>
+                    <div className="pt-2">
+                        <strong className="font-semibold text-gray-600 w-full inline-block">Meaning (from Jisho.org):</strong>
+                        {isLoading && <p>Loading definition...</p>}
+                        {error && <p className="text-red-500">{error}</p>}
+                        {jishoData ? (
+                            <div className="mt-2 space-y-3 pl-2 border-l-4 border-gray-200">
+                                {jishoData.senses.map((sense, index) => (
+                                    <div key={index}>
+                                        <p className="font-medium text-gray-700">{index + 1}. {sense.english_definitions.join('; ')}</p>
+                                        <p className="text-sm text-gray-500 ml-4">{sense.parts_of_speech.join(', ')}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (!isLoading && <p>No definition found.</p>)}
+                    </div>
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 };
 
@@ -285,33 +293,35 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ analysis, onWordSelec
     const createKey = (word: AnalyzedWord) => word.map(token => token[0]).join('-');
 
     return (
-        <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-gray-200 leading-loose text-2xl flex flex-wrap">
-            {analysis.word_list.map((word, index) => {
-                const surface = word.map(token => token[0]).join('');
-                let reading = word.map(token => token[1]).join('');
-                if (furiganaType === 'katakana') {
-                  reading = toKatakana(reading);
-                } else {
-                  reading = toHiragana(reading);
-                }
-                const pos = word[0][2];
-                const colorClass = posColors[pos] || posColors["その他"];
-                const isSelected = selectedWord && createKey(word) === createKey(selectedWord);
+        <Card className="mt-6">
+            <CardContent className="p-6 leading-loose text-2xl flex flex-wrap">
+                {analysis.word_list.map((word, index) => {
+                    const surface = word.map(token => token[0]).join('');
+                    let reading = word.map(token => token[1]).join('');
+                    if (furiganaType === 'katakana') {
+                      reading = toKatakana(reading);
+                    } else {
+                      reading = toHiragana(reading);
+                    }
+                    const pos = word[0][2];
+                    const colorClass = posColors[pos] || posColors["その他"];
+                    const isSelected = selectedWord && createKey(word) === createKey(selectedWord);
 
-                return (
-                    <span
-                        key={`${index}-${surface}`}
-                        onClick={() => onWordSelect(word)}
-                        className={`inline-block cursor-pointer transition-all duration-200 ease-in-out m-1 p-1 rounded-md ${colorClass} ${isSelected ? 'ring-2 ring-blue-500 scale-105' : 'hover:scale-105'}`}
-                    >
-                        <ruby>
-                            {surface}
-                            <rp>(</rp><rt className="text-sm font-light">{reading}</rt><rp>)</rp>
-                        </ruby>
-                    </span>
-                );
-            })}
-        </div>
+                    return (
+                        <span
+                            key={`${index}-${surface}`}
+                            onClick={() => onWordSelect(word)}
+                            className={`inline-block cursor-pointer transition-all duration-200 ease-in-out m-1 p-1 rounded-md ${colorClass} ${isSelected ? 'ring-2 ring-blue-500 scale-105' : 'hover:scale-105'}`}
+                        >
+                            <ruby>
+                                {surface}
+                                <rp>(</rp><rt className="text-sm font-light">{reading}</rt><rp>)</rp>
+                            </ruby>
+                        </span>
+                    );
+                })}
+            </CardContent>
+        </Card>
     );
 };
 
@@ -408,89 +418,71 @@ export default function App() {
                                 {/* Furigana Toggle */}
                                 <div className="flex items-center gap-4 mb-2">
                                     <label className="font-medium text-gray-700">Furigana style:</label>
-                                    <button
-                                        className={`px-3 py-1 rounded border ${furiganaType === 'hiragana' ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-white border-gray-300 text-gray-700'}`}
+                                    <Button
+                                        variant={furiganaType === 'hiragana' ? 'default' : 'outline'}
                                         onClick={() => setFuriganaType('hiragana')}
-                                    >Hiragana</button>
-                                    <button
-                                        className={`px-3 py-1 rounded border ${furiganaType === 'katakana' ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-white border-gray-300 text-gray-700'}`}
+                                    >Hiragana</Button>
+                                    <Button
+                                        variant={furiganaType === 'katakana' ? 'default' : 'outline'}
                                         onClick={() => setFuriganaType('katakana')}
-                                    >Katakana</button>
+                                    >Katakana</Button>
                                 </div>
 
                                 {/* Color Legend */}
                                 <section className="mt-4 mb-2">
                                     <h3 className="text-base font-semibold text-gray-700 mb-2">Color Legend (品詞凡例)</h3>
                                     <div className="flex flex-wrap gap-2">
-                                        {Object.entries(posColors).filter(([pos]) => [
-                                            "名詞","動詞","形容詞","副詞","助詞","助動詞","接続詞","連体詞","感動詞"
-                                        ].includes(pos)).map(([pos, colorClass]) => {
-                                            const english = {
-                                                "名詞": "Noun",
-                                                "動詞": "Verb",
-                                                "形容詞": "Adjective",
-                                                "副詞": "Adverb",
-                                                "助詞": "Particle",
-                                                "助動詞": "Auxiliary Verb",
-                                                "接続詞": "Conjunction",
-                                                "連体詞": "Attributive",
-                                                "感動詞": "Interjection"
-                                            }[pos];
+                                        {Object.entries(posColors).map(([pos, colorClass]) => {
+                                            const englishMap: { [key: string]: string } = {
+                                                "名詞": "Noun", "動詞": "Verb", "形容詞": "Adjective", "副詞": "Adverb",
+                                                "助詞": "Particle", "助動詞": "Aux. Verb", "接続詞": "Conjunction",
+                                                "連体詞": "Attributive", "感動詞": "Interjection", "記号": "Symbol",
+                                                "接頭詞": "Prefix", "接尾辞": "Suffix", "フィラー": "Filler",
+                                                "その他": "Other", "補助記号": "Sup. Symbol", "未知語": "Unknown"
+                                            };
                                             return (
-                                                <span key={pos} className={`px-2 py-1 rounded text-sm font-medium border ${colorClass}`}>{pos} <span className="text-gray-500">({english})</span></span>
-                                            );
-                                        })}
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {Object.entries(posColors).filter(([pos]) => [
-                                            "記号","接頭詞","接尾辞","フィラー","その他","補助記号","未知語"
-                                        ].includes(pos)).map(([pos, colorClass]) => {
-                                            const english = {
-                                                "記号": "Symbol",
-                                                "接頭詞": "Prefix",
-                                                "接尾辞": "Suffix",
-                                                "フィラー": "Filler",
-                                                "その他": "Other",
-                                                "補助記号": "Supplementary Symbol",
-                                                "未知語": "Unknown"
-                                            }[pos];
-                                            return (
-                                                <span key={pos} className={`px-2 py-1 rounded text-sm font-medium border ${colorClass}`}>{pos} <span className="text-gray-500">({english})</span></span>
+                                                <Badge key={pos} className={`${colorClass} hover:opacity-80`}>
+                                                    {pos} <span className="opacity-70 ml-1">({englishMap[pos] || 'N/A'})</span>
+                                                </Badge>
                                             );
                                         })}
                                     </div>
                                 </section>
 
                 <main className="mt-8">
-                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                        <h2 className="text-xl font-semibold text-gray-700 mb-4">Enter Japanese Text</h2>
-                        <textarea value={inputText} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInputText(e.target.value)} className="text-black w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="ここに日本語の文章を入力してください..."/>
-                        <div className="mt-4 flex flex-col items-center gap-4">
-                            <div className="flex flex-row justify-start gap-6 w-full">
-                                <button onClick={handleAnalyse} disabled={isLoading || tokenizerLoading} className="w-40 h-16 bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg">
+                    <Card>
+                        <CardHeader>
+                            <h2 className="text-xl font-semibold text-gray-700">Enter Japanese Text</h2>
+                        </CardHeader>
+                        <CardContent>
+                            <Textarea
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                className="w-full h-32 p-3"
+                                placeholder="ここに日本語の文章を入力してください..."
+                            />
+                            <div className="mt-4 flex flex-col sm:flex-row items-center gap-4">
+                                <Button onClick={handleAnalyse} disabled={isLoading || tokenizerLoading} size="lg">
                                     {tokenizerLoading ? "Loading Analyzer..." : (isLoading ? "Analyzing..." : "Analyse Text!")}
-                                </button>
-                                <button
-                                    onClick={handleExportCSV}
-                                    className="w-40 h-16 bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all flex items-center justify-center shadow-lg"
-                                >
+                                </Button>
+                                <Button onClick={handleExportCSV} variant="outline" size="lg">
                                     Export to CSV
-                                </button>
+                                </Button>
+                                <div className="text-sm text-gray-500 flex-wrap hidden sm:block">Or try an example:
+                                    {exampleTexts.map(text => (<Button variant="link" key={text} onClick={() => setInputText(text)} className="p-1">{text}</Button>))}
+                                </div>
                             </div>
-                            <div className="text-sm text-gray-500 flex-wrap">Or try an example:
-                                {exampleTexts.map(text => (<button key={text} onClick={() => setInputText(text)} className="ml-2 text-blue-500 hover:underline">`{text}`</button>))}
+                            <div className="text-sm text-gray-500 flex-wrap sm:hidden mt-2">Or try:
+                                {exampleTexts.map(text => (<Button variant="link" key={text} onClick={() => setInputText(text)} className="p-1">{text}</Button>))}
                             </div>
-                        </div>
-                        {error && <p className="mt-4 text-red-600 bg-red-100 p-3 rounded-lg">{error}</p>}
-                    </div>
+                            {error && <p className="mt-4 text-red-600 bg-red-100 p-3 rounded-lg">{error}</p>}
+                        </CardContent>
+                    </Card>
                     
                     {analysis && (
-                        <>
-                            
-                            <div className="animate-fade-in">
-                                <AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} furiganaType={furiganaType} />
-                            </div>
-                        </>
+                        <div className="animate-fade-in">
+                            <AnalysisDisplay analysis={analysis} onWordSelect={handleWordSelect} selectedWord={selectedWord} furiganaType={furiganaType} />
+                        </div>
                     )}
                     <WordInfo selectedWord={selectedWord} onClose={handleCloseInfo} />
                 </main>
